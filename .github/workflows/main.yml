@@ -11,55 +11,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Compilar App y Generar IPA
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build and Archive App
         run: |
-          # 1. Crear estructura temporal para la IPA
-          mkdir -p Payload/TrinusVR-iOS.app
-          
-          # 2. Compilar el archivo AppDelegate.swift directamente
-          swiftc -target arm64-apple-ios12.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
-            iOSApp/AppDelegate.swift -o Payload/TrinusVR-iOS.app/TrinusVR-iOS \
-            -framework UIKit -framework CoreMotion -framework Network
-          
-          # 3. Generar el archivo Info.plist de configuración
-          cat << 'EOF' > Payload/TrinusVR-iOS.app/Info.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>CFBundleExecutable</key>
-              <string>TrinusVR-iOS</string>
-              <key>CFBundleIdentifier</key>
-              <string>com.trinusios.client</string>
-              <key>CFBundleName</key>
-              <string>TrinusVR-iOS</string>
-              <key>CFBundleShortVersionString</key>
-              <string>1.0</string>
-              <key>CFBundleVersion</key>
-              <string>1</string>
-              <key>LSRequiresIPhoneOS</key>
-              <true/>
-              <key>MinimumOSVersion</key>
-              <string>12.0</string>
-              <key>UIRequiredDeviceCapabilities</key>
-              <array>
-                  <string>arm64</string>
-                  <string>gyroscope</string>
-                  <string>accelerometer</string>
-              </array>
-              <key>UISupportedInterfaceOrientations</key>
-              <array>
-                  <string>UIInterfaceOrientationLandscapeRight</string>
-              </array>
-          </dict>
-          </plist>
-          EOF
-          
-          # 4. Comprimir la carpeta Payload en formato .ipa
+          xcodebuild -project TrinusVR.xcodeproj \
+            -scheme TrinusVR \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath build/TrinusVR.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/TrinusVR.xcarchive/Products/Applications/TrinusVR.app Payload/
           zip -r TrinusVR-iOS.ipa Payload
           rm -rf Payload
 
-      - name: Subir Artifact (.ipa)
+      - name: Upload Artifact (.ipa)
         uses: actions/upload-artifact@v4
         with:
           name: TrinusVR-iOS-IPA
