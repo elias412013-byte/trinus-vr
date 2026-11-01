@@ -13,21 +13,50 @@ jobs:
 
       - name: Compilar App y Generar IPA
         run: |
-          # 1. Crear estructura de compilación temporal
-          mkdir -p Payload
+          # 1. Crear estructura temporal para la IPA
+          mkdir -p Payload/TrinusVR-iOS.app
           
-          # 2. Compilar usando swiftc directo con los frameworks necesarios
+          # 2. Compilar el código fuente directamente con swiftc
           swiftc -target arm64-apple-ios12.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
-            iOSApp/AppDelegate.swift -o TrinusVR-iOS -framework UIKit -framework CoreMotion -framework Network
+            iOSApp/AppDelegate.swift iOSApp/main.swift -o Payload/TrinusVR-iOS.app/TrinusVR-iOS \
+            -framework UIKit -framework CoreMotion -framework Network
           
-          # 3. Organizar dentro del Payload para la IPA
-          mkdir -p TrinusVR-iOS.app
-          mv TrinusVR-iOS TrinusVR-iOS.app/TrinusVR-iOS
-          cp iOSApp/Info.plist TrinusVR-iOS.app/Info.plist
-          mv TrinusVR-iOS.app Payload/
+          # 3. Generar un Info.plist limpio sin variables vacías
+          cat << 'EOF' > Payload/TrinusVR-iOS.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>TrinusVR-iOS</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.trinusios.client</string>
+              <key>CFBundleName</key>
+              <string>TrinusVR-iOS</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>LSRequiresIPhoneOS</key>
+              <true/>
+              <key>MinimumOSVersion</key>
+              <string>12.0</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                  <string>arm64</string>
+                  <string>gyroscope</string>
+                  <string>accelerometer</string>
+              </array>
+              <key>UISupportedInterfaceOrientations</key>
+              <array>
+                  <string>UIInterfaceOrientationLandscapeRight</string>
+              </array>
+          </dict>
+          </plist>
+          EOF
           
-          # 4. Comprimir en formato .ipa
-          zip -r TrinusVR-iOS.ipa Payload/
+          # 4. Comprimir la carpeta Payload en formato .ipa
+          zip -r TrinusVR-iOS.ipa Payload
           rm -rf Payload
 
       - name: Subir Artifact (.ipa)
