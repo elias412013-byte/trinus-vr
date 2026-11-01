@@ -16,7 +16,7 @@ jobs:
           # 1. Crear estructura de compilación temporal
           mkdir -p Payload
           
-          # 2. Compilar usando swiftc directamente (compatible con proyectos sencillos sin XcodeGen)
+          # 2. Compilar usando swiftc directo con los frameworks necesarios
           swiftc -target arm64-apple-ios12.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
             iOSApp/AppDelegate.swift -o TrinusVR-iOS -framework UIKit -framework CoreMotion -framework Network
           
@@ -31,7 +31,7 @@ jobs:
           rm -rf Payload
 
       - name: Subir Artifact (.ipa)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TrinusVR-iOS-IPA
           path: TrinusVR-iOS.ipa
