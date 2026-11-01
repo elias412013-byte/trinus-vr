@@ -2,6 +2,7 @@ import UIKit
 import CoreMotion
 import Network
 
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var motionManager = CMMotionManager()
