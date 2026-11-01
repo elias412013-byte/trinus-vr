@@ -2,13 +2,13 @@ import UIKit
 import CoreMotion
 import Network
 
-@main
+@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var motionManager = CMMotionManager()
     var connection: NWConnection?
     
-    let pcIP = "192.168.1.100"
+    let pcIP = "192.168.1.100" // Cambiar por la IP de tu PC
     let pcPort: UInt16 = 8080
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
