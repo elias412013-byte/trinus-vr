@@ -82,6 +82,3 @@ class VRStreamViewController: UIViewController {
         return .landscapeRight
     }
 }
-
-@UIApplicationMain
-class MainApplication: AppDelegate {}
