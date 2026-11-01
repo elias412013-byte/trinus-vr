@@ -16,12 +16,12 @@ jobs:
           # 1. Crear estructura temporal para la IPA
           mkdir -p Payload/TrinusVR-iOS.app
           
-          # 2. Compilar el código fuente directamente con swiftc
+          # 2. Compilar el archivo AppDelegate.swift directamente
           swiftc -target arm64-apple-ios12.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
-            iOSApp/AppDelegate.swift iOSApp/main.swift -o Payload/TrinusVR-iOS.app/TrinusVR-iOS \
+            iOSApp/AppDelegate.swift -o Payload/TrinusVR-iOS.app/TrinusVR-iOS \
             -framework UIKit -framework CoreMotion -framework Network
           
-          # 3. Generar un Info.plist limpio sin variables vacías
+          # 3. Generar el archivo Info.plist de configuración
           cat << 'EOF' > Payload/TrinusVR-iOS.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
