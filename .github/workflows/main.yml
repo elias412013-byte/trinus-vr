@@ -1,0 +1,27 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate || true
+
+      - name: Build App for iOS Device
+        run: |
+          if [ -d "*.xcodeproj" ]; then
+            PROJ_NAME=$(ls -d *.xcodeproj | head -n 1)
+            xcodebuild -project "$PROJ_NAME" -scheme "TrinusVR-iOS" -sdk iphoneos -configuration Release clean archive -archivePath build/TrinusVR.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          else
+            echo "No se encontró el archivo de proyecto o XcodeGen requiere configuración adicional."
+          fi
