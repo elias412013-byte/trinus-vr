@@ -11,17 +11,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode Project
-        run: xcodegen generate || true
-
-      - name: Build App for iOS Device
+      - name: Compilar App y Generar IPA
         run: |
-          if [ -d "*.xcodeproj" ]; then
-            PROJ_NAME=$(ls -d *.xcodeproj | head -n 1)
-            xcodebuild -project "$PROJ_NAME" -scheme "TrinusVR-iOS" -sdk iphoneos -configuration Release clean archive -archivePath build/TrinusVR.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-          else
-            echo "No se encontró el archivo de proyecto o XcodeGen requiere configuración adicional."
-          fi
+          # 1. Crear estructura de compilación temporal
+          mkdir -p Payload
+          
+          # 2. Compilar usando swiftc directamente (compatible con proyectos sencillos sin XcodeGen)
+          swiftc -target arm64-apple-ios12.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
+            iOSApp/AppDelegate.swift -o TrinusVR-iOS -framework UIKit -framework CoreMotion -framework Network
+          
+          # 3. Organizar dentro del Payload para la IPA
+          mkdir -p TrinusVR-iOS.app
+          mv TrinusVR-iOS TrinusVR-iOS.app/TrinusVR-iOS
+          cp iOSApp/Info.plist TrinusVR-iOS.app/Info.plist
+          mv TrinusVR-iOS.app Payload/
+          
+          # 4. Comprimir en formato .ipa
+          zip -r TrinusVR-iOS.ipa Payload/
+          rm -rf Payload
+
+      - name: Subir Artifact (.ipa)
+        uses: actions/upload-artifact@v3
+        with:
+          name: TrinusVR-iOS-IPA
+          path: TrinusVR-iOS.ipa
