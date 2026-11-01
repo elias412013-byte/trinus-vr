@@ -2,14 +2,12 @@ import UIKit
 import CoreMotion
 import Network
 
-@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var motionManager = CMMotionManager()
     var connection: NWConnection?
     
-    // IP local de tu PC donde correrá server.py
-    let pcIP = "192.168.1.100" // Reemplaza con la IP de tu PC
+    let pcIP = "192.168.1.100"
     let pcPort: UInt16 = 8080
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -50,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func sendUDPPayload(_ string: String) {
         guard let data = string.data(using: .utf8) else { return }
-        connection?.send(content: data, completion: .contentReceived({ error in
+        connection?.send(content: data, completion: .contentProcessed({ error in
             if let error = error {
                 print("Error UDP: \(error)")
             }
@@ -84,3 +82,6 @@ class VRStreamViewController: UIViewController {
         return .landscapeRight
     }
 }
+
+@UIApplicationMain
+class MainApplication: AppDelegate {}
